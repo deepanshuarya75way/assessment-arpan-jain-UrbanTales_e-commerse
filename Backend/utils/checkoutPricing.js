@@ -16,6 +16,34 @@ const buildHttpError = (statusCode, message) =>
 
 const normalizeGiftCode = (code) => String(code || "").trim().toUpperCase();
 
+// Area- Base Discount
+const AREA_DISCOUNTS= {
+  "281001":10,
+  "243001":5,
+};
+
+const calculateAreaDiscount = (pincode, subtotal)=>{
+  const normalizedPincode = String(pincode || "").trim();
+
+  if(!/^\d{6}$/.test(normalizedPincode)) {
+    return {
+      eligible: false,
+      discountPercentage:0,
+      discountAmount: 0,
+    };
+  }
+
+  const discountPercentage = AREA_DISCOUNTS[normalizedPincode] || 0;
+
+  return{
+    eligible: discountPercentage>0,
+    discountPercentage,
+    discountAmount: roundAmount(
+      (subtotal*discountPercentage)/100
+    ),
+  };
+};
+
 const resolveGiftCode = async ({
   code,
   userId,
@@ -93,6 +121,7 @@ export const calculateCheckoutPricing = async ({
   consumeWallet = false,
   walletOrderId = "",
   walletNote = "Checkout debit",
+  deliveryPincode="",
 }) => {
   const cart = await Cart.findOne({ userId });
   if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
@@ -150,6 +179,11 @@ export const calculateCheckoutPricing = async ({
     )
   );
 
+  const areaDiscount = calculateAreaDiscount(
+    deliveryPincode, subtotal
+  );
+  
+  const areaDiscountAmount = Math.min(areaDiscount.discountAmount,subtotal);
   const {
     appliedGiftCode,
     appliedGiftType,
@@ -163,7 +197,7 @@ export const calculateCheckoutPricing = async ({
   });
 
   const intermediateTotal = roundAmount(
-    Math.max(0, subtotal + normalizedDeliveryCharge - appliedDiscountAmount)
+    Math.max(0, subtotal + normalizedDeliveryCharge - appliedDiscountAmount-areaDiscountAmount)
   );
 
   let appliedGiftBalance = 0;

@@ -68,6 +68,7 @@ export const createOrder = async (req, res) => {
       giftCode = "",
       useGiftBalance = false,
       paymentDetails = {},
+      deliveryPincode = "",
     } = req.body;
 
     if (!name || !mobile || !address || !paymentMethod) {
@@ -82,6 +83,7 @@ export const createOrder = async (req, res) => {
       deliveryCharge,
       consumeGiftCode: false,
       consumeWallet: false,
+      deliveryPincode,
     });
 
     const normalizedPaymentMethod = String(paymentMethod || "").toLowerCase();
@@ -166,6 +168,7 @@ export const createOrder = async (req, res) => {
       consumeWallet: Boolean(useGiftBalance),
       walletOrderId: orderId,
       walletNote: `Applied on order ${orderId}`,
+      deliveryPincode,
     });
 
     if (finalizedPricing.totalAmount !== previewPricing.totalAmount) {

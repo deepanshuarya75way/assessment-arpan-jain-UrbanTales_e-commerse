@@ -17,12 +17,13 @@ router.post("/order", verifyToken, async (req, res) => {
       });
     }
 
-    const { giftCode = "", useGiftBalance = false, deliveryCharge = 50 } = req.body || {};
+    const { giftCode = "", useGiftBalance = false, deliveryCharge = 50, deliveryPincode="", } = req.body || {};
     const pricing = await calculateCheckoutPricing({
       userId: req.userId,
       giftCode,
       useGiftBalance: Boolean(useGiftBalance),
       deliveryCharge,
+      deliveryPincode,
       consumeGiftCode: false,
       consumeWallet: false,
     });

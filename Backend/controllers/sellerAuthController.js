@@ -19,8 +19,22 @@ function normalizeEmail(email) {
   return String(email || "").toLowerCase().trim();
 }
 
+// function normalizeAddress(address) {
+//   return Array.isArray(address) ? address : [];
+// }
 function normalizeAddress(address) {
-  return Array.isArray(address) ? address : [];
+  if(Array.isArray(address)) {
+    return address.filter(Boolean).join(", ");
+  }
+
+  if(typeof address === "string"){
+    return address.trim();
+  }
+  
+  if(address && typeof address === "object") {
+    return Object.values(address).filter(Boolean).join(", ");
+  }
+  return "";
 }
 
 function generateUsername(fullName = "seller") {
